@@ -1,6 +1,6 @@
 import * as React from "react";
 import ApiClient from "../services/ApiClient";
-
+import LastAttemptsComponent from './LastAttemptsComponent';
 
 class ChallengeComponent extends React.Component {
 
@@ -11,14 +11,17 @@ class ChallengeComponent extends React.Component {
             b: '',
             user: '',
             message: '',
-            guess: 0
+            guess: 0,
+            lastAttempts: []
         };
         this.handleSubmitResult = this.handleSubmitResult.bind(this);
         this.handleChange = this.handleChange.bind(this);
     }
 
-    componentDidMount() {
-        ApiClient.challenge().then(
+    componentDidMount() { this.refreshChallenge(); }
+
+    refreshChallenge() {
+        ApiClient.getChallenge().then(
             res => {
                 if (res.ok) {
                     res.json().then(json => {
@@ -55,6 +58,8 @@ class ChallengeComponent extends React.Component {
                             } else {
                                 this.updateMessage(`Oops! Your guess ${json.resultAttempt} is wrong, but keep playing!`);
                             }
+                            this.updateLastAttempts(this.state.user);
+                            this.refreshChallenge();
                         }
                     );
                 } else {
@@ -68,14 +73,26 @@ class ChallengeComponent extends React.Component {
         this.setState({message: m});
     }
 
+    updateLastAttempts(userAlias) {
+        ApiClient.getAttempts(userAlias).then(res => {
+            if (res.ok) {
+                let attempts = [];
+                res.json().then(data => {
+                    data.forEach(item => { attempts.push(item); });
+                    this.setState({ lastAttempts: attempts });
+                });
+            }
+        });
+    }
+
     render() {
         return (
-            <div>
+            <div className="display-column">
                 <div>
-                    <h3>Your new challenge</h3>
-                    <h1>
+                    <h3>Your new challenge is</h3>
+                    <div className="challenge">
                         {this.state.a} x {this.state.b}
-                    </h1>
+                    </div>
                 </div>
                 <form onSubmit={this.handleSubmitResult}>
                     <label>
@@ -97,6 +114,8 @@ class ChallengeComponent extends React.Component {
                     <input type="submit" value="Submit" />
                 </form>
                 <h4>{this.state.message}</h4>
+                {this.state.lastAttempts.length > 0 
+                    && <LastAttemptsComponent lastAttempts={this.state.lastAttempts}/>}
             </div>
         )
     }
