@@ -1,6 +1,7 @@
 import * as React from "react";
 import ApiClient from "../services/ApiClient";
 import LastAttemptsComponent from './LastAttemptsComponent';
+import LeaderBoardComponent from "./LeaderBoardComponent";
 
 class ChallengeComponent extends React.Component {
 
@@ -105,7 +106,7 @@ class ChallengeComponent extends React.Component {
                     <br/>
                     <label>
                         Your guess:
-                        <input type="number" min="0"
+                        <input type="number" min="1"
                                name="guess"
                                value={this.state.guess}
                                onChange={this.handleChange}/>
@@ -116,8 +117,10 @@ class ChallengeComponent extends React.Component {
                 <h4>{this.state.message}</h4>
                 {this.state.lastAttempts.length > 0 
                     && <LastAttemptsComponent lastAttempts={this.state.lastAttempts}/>}
+
+                <div className="display-column"><LeaderBoardComponent /></div>
             </div>
-        )
+        );
     }
 }
 
